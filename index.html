@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-white font-sans">
+    <div class="p-4">
+        <div class="flex justify-between items-center bg-slate-800 p-3 rounded-xl mb-6">
+            <div class="flex items-center gap-2">
+                <div id="user-photo" class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center font-bold text-xs">U</div>
+                <span id="user-name" class="text-sm font-medium">Loading...</span>
+            </div>
+            <button class="text-gray-400">⚙️ Settings</button>
+        </div>
+
+        <div class="bg-gradient-to-br from-blue-600 to-indigo-700 p-8 rounded-3xl text-center shadow-2xl mb-8">
+            <p class="text-blue-100 text-xs uppercase tracking-widest mb-1">Total Balance</p>
+            <h1 class="text-4xl font-black">৳ <span id="balance">0.00</span></h1>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 text-center">
+            <button class="bg-slate-800 p-4 rounded-2xl border border-slate-700 hover:scale-95 transition">📄<br><span class="text-[10px]">Transactions</span></button>
+            <button class="bg-slate-800 p-4 rounded-2xl border border-slate-700 hover:scale-95 transition">👥<br><span class="text-[10px]">Invite Friends</span></button>
+            <button class="bg-slate-800 p-4 rounded-2xl border border-slate-700 hover:scale-95 transition">🎮<br><span class="text-[10px]">Play Game</span></button>
+            <button class="bg-slate-800 p-4 rounded-2xl border border-slate-700 hover:scale-95 transition text-yellow-500">🏆<br><span class="text-[10px]">Level 0</span></button>
+        </div>
+
+        <div class="flex gap-4 mt-8">
+            <button class="flex-1 bg-green-600 py-3 rounded-xl font-bold shadow-lg shadow-green-900/20 active:scale-95 transition">Deposit 💳</button>
+            <button class="flex-1 bg-red-600 py-3 rounded-xl font-bold shadow-lg shadow-red-900/20 active:scale-95 transition">Withdraw 💸</button>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        document.getElementById('user-name').innerText = tg.initDataUnsafe?.user?.first_name || "User";
+    </script>
+</body>
+</html>
