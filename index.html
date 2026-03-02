@@ -11,10 +11,12 @@
     <div class="p-4">
         <div class="flex justify-between items-center bg-slate-800 p-3 rounded-xl mb-6">
             <div class="flex items-center gap-2">
-                <div id="user-photo" class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center font-bold text-xs">U</div>
+                <div id="user-photo" class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center font-bold text-xs uppercase text-white">
+                    <span id="user-initial">U</span>
+                </div>
                 <span id="user-name" class="text-sm font-medium">Loading...</span>
             </div>
-            <button class="text-gray-400">⚙️ Settings</button>
+            <button class="text-gray-400 text-sm">⚙️ Settings</button>
         </div>
 
         <div class="bg-gradient-to-br from-blue-600 to-indigo-700 p-8 rounded-3xl text-center shadow-2xl mb-8">
@@ -24,21 +26,47 @@
 
         <div class="grid grid-cols-2 gap-4 text-center">
             <button class="bg-slate-800 p-4 rounded-2xl border border-slate-700 hover:scale-95 transition">📄<br><span class="text-[10px]">Transactions</span></button>
-            <button class="bg-slate-800 p-4 rounded-2xl border border-slate-700 hover:scale-95 transition">👥<br><span class="text-[10px]">Invite Friends</span></button>
+            <button onclick="inviteFriends()" class="bg-slate-800 p-4 rounded-2xl border border-slate-700 hover:scale-95 transition">👥<br><span class="text-[10px]">Invite Friends</span></button>
             <button class="bg-slate-800 p-4 rounded-2xl border border-slate-700 hover:scale-95 transition">🎮<br><span class="text-[10px]">Play Game</span></button>
             <button class="bg-slate-800 p-4 rounded-2xl border border-slate-700 hover:scale-95 transition text-yellow-500">🏆<br><span class="text-[10px]">Level 0</span></button>
         </div>
 
         <div class="flex gap-4 mt-8">
-            <button class="flex-1 bg-green-600 py-3 rounded-xl font-bold shadow-lg shadow-green-900/20 active:scale-95 transition">Deposit 💳</button>
-            <button class="flex-1 bg-red-600 py-3 rounded-xl font-bold shadow-lg shadow-red-900/20 active:scale-95 transition">Withdraw 💸</button>
+            <button class="flex-1 bg-green-600 py-3 rounded-xl font-bold shadow-lg active:scale-95 transition">Deposit 💳</button>
+            <button class="flex-1 bg-red-600 py-3 rounded-xl font-bold shadow-lg active:scale-95 transition">Withdraw 💸</button>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        document.getElementById('user-name').innerText = tg.initDataUnsafe?.user?.first_name || "User";
+        tg.ready();
+
+        const user = tg.initDataUnsafe?.user;
+
+        if (user) {
+            document.getElementById('user-name').innerText = user.first_name + (user.last_name ? " " + user.last_name : "");
+            document.getElementById('user-initial').innerText = user.first_name.charAt(0);
+
+            // ডাটাবেস থেকে ব্যালেন্স নিয়ে আসা
+            fetch(`/api/user/${user.id}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.balance !== undefined) {
+                        document.getElementById('balance').innerText = data.balance.toLocaleString();
+                    }
+                })
+                .catch(err => console.error("Balance fetch error:", err));
+        }
+
+        // ইনভাইট বাটন ফাংশন
+        function inviteFriends() {
+            const botUsername = "আপনার_বোট_ইউজারনেম"; // এখানে @ ছাড়া বোটের ইউজারনেম দিন
+            const inviteLink = `https://t.me/${botUsername}?start=${user.id}`;
+            const shareText = "এই চমৎকার গেমে যোগ দিন এবং পুরস্কার জিতুন!";
+            const fullUrl = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(shareText)}`;
+            tg.openTelegramLink(fullUrl);
+        }
     </script>
 </body>
 </html>
