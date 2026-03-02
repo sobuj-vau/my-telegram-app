@@ -113,7 +113,20 @@ bot.on('text', (ctx) => {
 // ========================
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
+});// ইউজারের ব্যালেন্স ডাটাবেস থেকে এনে দেখানোর API
+app.get('/api/user/:id', async (req, res) => {
+  try {
+    const user = await User.findOne({ telegramId: req.params.id });
+    if (user) {
+      res.json({ balance: user.balance, name: user.name });
+    } else {
+      res.status(404).json({ error: "ইউজার পাওয়া যায়নি" });
+    }
+  } catch (error) {
+    res.status(500).json({ error: "সার্ভার এরর" });
+  }
 });
+
 
 // ========================
 // সার্ভার ও বট চালু করা
