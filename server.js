@@ -8,8 +8,6 @@ require('dotenv').config();
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-// index.html ফাইলটি দেখানোর জন্য এই লাইনটি জরুরি
 app.use(express.static(path.join(__dirname, '/')));
 
 const bot = new Telegraf(process.env.BOT_TOKEN);
@@ -18,25 +16,31 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ Database Connected"))
   .catch(err => console.error("❌ DB Connection Error:", err));
 
+// ইউজার স্কিমা (এখানে ভুল ছিল যা ঠিক করা হয়েছে)
 const User = mongoose.model('User', {
-  telegramId: String,
+  telegramId: { type: String, unique: true },
   name: String,
   balance: { type: Number, default: 0 }
 });
 
 bot.start(async (ctx) => {
-  const { id, first_name } = ctx.from;
-  let user = await User.findOne({ telegramId: id });
-  if (!user) {
-    user = new User({ telegramId: id, name: first_name });
-    await user.save();
+  try {
+    const { id, first_name } = ctx.from;
+    let user = await User.findOne({ telegramId: id.toString() });
+    
+    if (!user) {
+      user = new User({ telegramId: id.toString(), name: first_name });
+      await user.save();
+    }
+    
+    ctx.reply(`👋 স্বাগতম ${first_name}!`, Markup.inlineKeyboard([
+      [Markup.button.webApp('অ্যাপ ওপেন করুন 🚀', process.env.APP_URL)]
+    ]));
+  } catch (error) {
+    console.error("Bot Start Error:", error);
   }
-  ctx.reply(`👋 স্বাগতম ${first_name}!`, Markup.inlineKeyboard([
-    [Markup.button.webApp('অ্যাপ ওপেন করুন 🚀', process.env.APP_URL)]
-  ]));
 });
 
-// মূল লিঙ্কে ভিজিট করলে এখন আপনার ডিজাইন করা HTML পেজ দেখাবে
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
@@ -44,5 +48,5 @@ app.get('/', (req, res) => {
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
-  bot.launch();
+  bot.launch().catch(err => console.error("Bot Launch Error:", err));
 });
