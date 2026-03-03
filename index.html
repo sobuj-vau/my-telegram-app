@@ -3,70 +3,281 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini App</title>
+    <title>Nova · modern mini app</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #0b1120; }
+        .glass-balance {
+            background: linear-gradient(145deg, rgba(37,99,235,0.9), rgba(79,70,229,0.95));
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 25px 40px -15px rgba(0,20,80,0.6);
+        }
+        .stat-card {
+            background: rgba(30,41,59,0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: transform 0.1s ease;
+        }
+        .stat-card:active { transform: scale(0.97); }
+        .bottom-nav {
+            background: rgba(15,23,42,0.8);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+        .copy-btn {
+            background: rgba(255,255,255,0.1);
+            transition: all 0.15s;
+        }
+        .copy-btn:active { background: rgba(255,255,255,0.2); }
+    </style>
 </head>
-<body class="bg-slate-900 text-white font-sans">
-    <div class="p-4">
-        <div class="flex justify-between items-center bg-slate-800 p-3 rounded-xl mb-6">
-            <div class="flex items-center gap-2">
-                <div id="user-photo" class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center font-bold text-xs uppercase text-white">
-                    <span id="user-initial">U</span>
+<body class="bg-[#0b1120] text-white min-h-screen flex flex-col">
+
+    <div class="flex-1 pb-24 px-4 pt-5 max-w-md mx-auto w-full">
+
+        <!-- header with user -->
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex items-center gap-3">
+                <div id="user-avatar" class="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center shadow-lg shadow-indigo-900/30 ring-2 ring-white/10">
+                    <span id="user-initial" class="text-white font-semibold text-lg">U</span>
                 </div>
-                <span id="user-name" class="text-sm font-medium">Loading...</span>
+                <div>
+                    <span id="user-name" class="text-sm font-medium text-gray-200 block">Loading...</span>
+                    <span class="text-xs text-gray-400 flex items-center gap-1 mt-0.5"><i class="fa-regular fa-circle-check text-blue-400"></i> active</span>
+                </div>
             </div>
-            <button class="text-gray-400 text-sm">⚙️ Settings</button>
+            <button onclick="tg.showAlert('⚙️ সেটিংস শীঘ্রই আসছে')" class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center backdrop-blur-sm border border-white/10 text-gray-300 text-xl active:bg-white/20 transition">
+                <i class="fa-solid fa-sliders"></i>
+            </button>
         </div>
 
-        <div class="bg-gradient-to-br from-blue-600 to-indigo-700 p-8 rounded-3xl text-center shadow-2xl mb-8">
-            <p class="text-blue-100 text-xs uppercase tracking-widest mb-1">Total Balance</p>
-            <h1 class="text-4xl font-black">৳ <span id="balance">0.00</span></h1>
+        <!-- balance card -->
+        <div class="glass-balance rounded-3xl p-6 mb-7 relative overflow-hidden">
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-blue-300/20 rounded-full blur-3xl"></div>
+            <div class="absolute -bottom-8 -left-8 w-28 h-28 bg-indigo-300/20 rounded-full blur-3xl"></div>
+            <div class="relative z-10">
+                <p class="text-blue-100 text-xs uppercase tracking-widest flex items-center gap-1"><i class="fa-regular fa-star"></i> মোট ব্যালেন্স</p>
+                <h1 class="text-5xl font-black mt-1 flex items-baseline gap-2">
+                    ৳ <span id="balance">0.00</span>
+                </h1>
+                <p class="text-blue-200 text-sm mt-3 flex items-center gap-2">
+                    <i class="fa-regular fa-clock"></i> সর্বশেষ আপডেট
+                </p>
+            </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-4 text-center">
-            <button class="bg-slate-800 p-4 rounded-2xl border border-slate-700 hover:scale-95 transition">📄<br><span class="text-[10px]">Transactions</span></button>
-            <button onclick="inviteFriends()" class="bg-slate-800 p-4 rounded-2xl border border-slate-700 hover:scale-95 transition">👥<br><span class="text-[10px]">Invite Friends</span></button>
-            <button class="bg-slate-800 p-4 rounded-2xl border border-slate-700 hover:scale-95 transition">🎮<br><span class="text-[10px]">Play Game</span></button>
-            <button class="bg-slate-800 p-4 rounded-2xl border border-slate-700 hover:scale-95 transition text-yellow-500">🏆<br><span class="text-[10px]">Level 0</span></button>
+        <!-- quick actions -->
+        <div class="grid grid-cols-4 gap-2 text-center mb-6">
+            <button onclick="tg.showAlert('📄 ইতিহাস শীঘ্রই আসছে')" class="stat-card p-3 rounded-xl flex flex-col items-center gap-1.5">
+                <i class="fa-solid fa-clock-rotate-left text-blue-400 text-xl"></i>
+                <span class="text-[11px] font-medium text-gray-300">হিস্ট্রি</span>
+            </button>
+            <button onclick="inviteFriends()" class="stat-card p-3 rounded-xl flex flex-col items-center gap-1.5">
+                <i class="fa-solid fa-user-group text-green-400 text-xl"></i>
+                <span class="text-[11px] font-medium text-gray-300">ইনভাইট</span>
+            </button>
+            <button onclick="playGame()" class="stat-card p-3 rounded-xl flex flex-col items-center gap-1.5 bg-gradient-to-b from-purple-900/40 to-purple-800/20 border-purple-500/20">
+                <i class="fa-solid fa-gamepad text-yellow-300 text-xl"></i>
+                <span class="text-[11px] font-medium text-gray-300">গেম</span>
+            </button>
+            <button onclick="tg.showAlert('🏆 লেভেল ০ — এক্সপি অর্জন করুন')" class="stat-card p-3 rounded-xl flex flex-col items-center gap-1.5">
+                <i class="fa-solid fa-ranking-star text-amber-400 text-xl"></i>
+                <span class="text-[11px] font-medium text-gray-300">লেভেল ০</span>
+            </button>
         </div>
 
-        <div class="flex gap-4 mt-8">
-            <button class="flex-1 bg-green-600 py-3 rounded-xl font-bold shadow-lg active:scale-95 transition">Deposit 💳</button>
-            <button class="flex-1 bg-red-600 py-3 rounded-xl font-bold shadow-lg active:scale-95 transition">Withdraw 💸</button>
+        <!-- referral card with dynamic link -->
+        <div class="stat-card p-5 rounded-2xl mb-5 relative border border-indigo-500/20">
+            <div class="flex items-start justify-between">
+                <div>
+                    <span class="text-xs text-gray-400 flex items-center gap-1"><i class="fa-regular fa-hand-peace"></i> আপনার রেফারেল লিঙ্ক</span>
+                    <p id="referral-link" class="text-sm font-mono mt-1 text-indigo-200 break-all">https://t.me/YourBot?start=...</p>
+                </div>
+                <button onclick="copyReferral()" class="copy-btn text-sm px-3 py-1.5 rounded-xl flex items-center gap-1.5 text-white">
+                    <i class="fa-regular fa-copy"></i> <span class="text-xs">কপি</span>
+                </button>
+            </div>
+            <div class="flex gap-4 mt-4">
+                <div><span class="text-gray-400 text-xs">রেফারেল</span><span class="block text-xl font-bold" id="referral-count">০</span></div>
+                <div><span class="text-gray-400 text-xs">আয়</span><span class="block text-xl font-bold">৳ <span id="referral-earn">০.০০</span></span></div>
+            </div>
         </div>
+
+        <!-- deposit/withdraw -->
+        <div class="flex gap-3 mb-7">
+            <button onclick="tg.showAlert('💳 ডিপোজিট সিস্টেম শীঘ্রই আসছে')" class="flex-1 bg-gradient-to-r from-emerald-500 to-green-600 py-3.5 rounded-xl font-semibold text-white shadow-xl shadow-green-900/30 active:scale-[0.98] transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-arrow-down"></i> ডিপোজিট
+            </button>
+            <button onclick="tg.showAlert('💸 সাপোর্ট টিমে যোগাযোগ করুন')" class="flex-1 bg-gradient-to-r from-rose-500 to-pink-600 py-3.5 rounded-xl font-semibold text-white shadow-xl shadow-rose-900/30 active:scale-[0.98] transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-arrow-up"></i> উইথড্র'
+            </button>
+        </div>
+
+        <!-- recent activity (static for now) -->
+        <div class="mt-2">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-semibold text-sm text-gray-300 flex items-center gap-1"><i class="fa-regular fa-clock text-blue-400"></i> সাম্প্রতিক কার্যক্রম</h3>
+                <span class="text-xs text-gray-500">সর্বশেষ</span>
+            </div>
+            <div class="space-y-2">
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-white/5 backdrop-blur-sm border border-white/5">
+                    <div class="w-8 h-8 rounded-full bg-blue-600/30 flex items-center justify-center"><i class="fa-solid fa-gift text-blue-300 text-xs"></i></div>
+                    <div class="flex-1"><p class="text-sm">বোনাস জমা</p><p class="text-xs text-gray-400">২ ঘন্টা আগে</p></div>
+                    <span class="text-emerald-400 font-medium">+৳ ২.৫০</span>
+                </div>
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-white/5 backdrop-blur-sm border border-white/5">
+                    <div class="w-8 h-8 rounded-full bg-purple-600/30 flex items-center justify-center"><i class="fa-solid fa-gamepad text-purple-300 text-xs"></i></div>
+                    <div class="flex-1"><p class="text-sm">গেম পুরস্কার</p><p class="text-xs text-gray-400">গতকাল</p></div>
+                    <span class="text-emerald-400 font-medium">+৳ ০.৮০</span>
+                </div>
+            </div>
+        </div>
+        <div class="h-6"></div>
+    </div>
+
+    <!-- bottom navigation -->
+    <div class="bottom-nav fixed bottom-0 left-0 right-0 flex justify-around items-center py-2 px-2 text-xs text-gray-400 max-w-md mx-auto rounded-t-3xl shadow-2xl" style="left:50%; transform:translateX(-50%); width:100%;">
+        <button class="flex flex-col items-center p-2 nav-active"><i class="fa-solid fa-house text-white text-xl"></i><span class="mt-1 text-[10px] text-white">হোম</span></button>
+        <button onclick="tg.showAlert('📊 পরিসংখ্যান শীঘ্রই আসছে')" class="flex flex-col items-center p-2"><i class="fa-solid fa-chart-simple text-gray-400 text-xl"></i><span class="mt-1 text-[10px]">স্ট্যাটস</span></button>
+        <button onclick="tg.showAlert('🎮 গেম লোড হচ্ছে...')" class="flex flex-col items-center p-2 relative">
+            <span class="absolute -top-2 bg-red-500 text-white text-[8px] px-1 rounded-full">নতুন</span>
+            <i class="fa-solid fa-dice-d6 text-gray-400 text-xl"></i><span class="mt-1 text-[10px]">গেমস</span>
+        </button>
+        <button onclick="tg.showAlert('👥 রেফারেল লিডারবোর্ড')" class="flex flex-col items-center p-2"><i class="fa-solid fa-trophy text-gray-400 text-xl"></i><span class="mt-1 text-[10px]">টপ</span></button>
     </div>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.ready();
+        (function() {
+            const tg = window.Telegram.WebApp;
+            tg.expand();
+            tg.ready();
 
-        const user = tg.initDataUnsafe?.user;
+            // ----- ১. আপনার বোটের ইউজারনেম এখানে দিন (যেমন: mycoolbot) -----
+            const BOT_USERNAME = "CoinRushMini_bot"; // @ ছাড়া বটের ইউজারনেম দিন
 
-        if (user) {
-            document.getElementById('user-name').innerText = user.first_name + (user.last_name ? " " + user.last_name : "");
-            document.getElementById('user-initial').innerText = user.first_name.charAt(0);
+            // টেলিগ্রাম ইউজার অবজেক্ট
+            const user = tg.initDataUnsafe?.user;
 
-            // ডাটাবেস থেকে ব্যালেন্স নিয়ে আসা
-            fetch(`/api/user/${user.id}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.balance !== undefined) {
-                        document.getElementById('balance').innerText = data.balance.toLocaleString();
-                    }
-                })
-                .catch(err => console.error("Balance fetch error:", err));
-        }
+            // DOM এলিমেন্ট
+            const userNameSpan = document.getElementById('user-name');
+            const userInitialSpan = document.getElementById('user-initial');
+            const userAvatarDiv = document.getElementById('user-avatar');
+            const balanceSpan = document.getElementById('balance');
+            const referralLinkEl = document.getElementById('referral-link');
+            const referralCountSpan = document.getElementById('referral-count');
+            const referralEarnSpan = document.getElementById('referral-earn');
 
-                // ইনভাইট বাটন ফাংশন
-        function inviteFriends() {
-            const botUsername = "আপনার_বোট_ইউজারনেম"; // এখানে বোটের আসল নাম দিন
-            const inviteLink = `https://t.me/${botUsername}?start=${user.id}`;
-            const shareText = "এই চমৎকার গেমে যোগ দিন এবং পুরস্কার জিতুন!";
-            const fullUrl = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(shareText)}`;
-            tg.openTelegramLink(fullUrl);
-        }
+            if (user) {
+                // নাম ও ইনিশিয়াল
+                let fullName = user.first_name || 'User';
+                if (user.last_name) fullName += ' ' + user.last_name;
+                userNameSpan.innerText = fullName;
+                userInitialSpan.innerText = user.first_name ? user.first_name.charAt(0).toUpperCase() : 'U';
 
+                // ইউজারের ফটো থাকলে সেট করুন
+                if (user.photo_url) {
+                    userAvatarDiv.innerHTML = `<img src="${user.photo_url}" class="w-11 h-11 rounded-2xl object-cover" alt="avatar">`;
+                }
+
+                // রেফারেল লিঙ্ক তৈরি
+                const inviteLink = `https://t.me/${BOT_USERNAME}?start=${user.id}`;
+                referralLinkEl.innerText = inviteLink;
+
+                // ৩. ডাটাবেস থেকে আসল ব্যালেন্স নিয়ে আসা (এবং রেফারেল তথ্য)
+                fetch(`/api/user/${user.id}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.balance !== undefined) {
+                            // লোকাল ফরম্যাটে দেখান (যেমন ১২৫.৭৫)
+                            balanceSpan.innerText = data.balance.toFixed(2);
+                        }
+                        // যদি রেফারেল কাউন্ট ও আয় ব্যাকএন্ড থেকে আসে
+                        if (data.referralCount !== undefined) {
+                            referralCountSpan.innerText = data.referralCount;
+                        }
+                        if (data.referralEarnings !== undefined) {
+                            referralEarnSpan.innerText = data.referralEarnings.toFixed(2);
+                        } else {
+                            // ডেমো ডাটা (যদি না থাকে)
+                            referralCountSpan.innerText = '127';
+                            referralEarnSpan.innerText = '12.5';
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Database error:", err);
+                        balanceSpan.innerText = "০.০০";
+                        // ফallback ডাটা
+                        referralCountSpan.innerText = '127';
+                        referralEarnSpan.innerText = '12.5';
+                    });
+            } else {
+                // টেস্ট মোড (যখন টেলিগ্রামে নয়)
+                userNameSpan.innerText = 'টেস্ট ইউজার';
+                userInitialSpan.innerText = 'T';
+                const demoId = 123456;
+                const inviteLink = `https://t.me/${BOT_USERNAME}?start=${demoId}`;
+                referralLinkEl.innerText = inviteLink;
+                balanceSpan.innerText = '১,২৫০.৫০';
+                referralCountSpan.innerText = '127';
+                referralEarnSpan.innerText = '১২.৫';
+            }
+
+            // গ্লোবাল ফাংশন
+            window.tg = tg;
+
+            // ইনভাইট ফ্রেন্ডস
+            window.inviteFriends = function() {
+                if (!user) {
+                    tg.showAlert('প্রথমে টেলিগ্রাম ওপেন করুন');
+                    return;
+                }
+                const inviteLink = `https://t.me/${BOT_USERNAME}?start=${user.id}`;
+                const shareText = `🚀 এই চমৎকার গেমে যোগ দিন এবং পুরস্কার জিতুন!`;
+                const fullUrl = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(shareText)}`;
+                tg.openTelegramLink(fullUrl);
+            };
+
+            // কপি রেফারেল লিঙ্ক (আধুনিক + ফallback)
+            window.copyReferral = function() {
+                if (!user) {
+                    tg.showAlert('ইউজার তথ্য পাওয়া যায়নি');
+                    return;
+                }
+                const link = `https://t.me/${BOT_USERNAME}?start=${user.id}`;
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(link).then(() => {
+                        tg.showAlert('✅ ইনভাইট লিঙ্ক কপি হয়েছে!');
+                    }).catch(() => {
+                        fallbackCopy(link);
+                    });
+                } else {
+                    fallbackCopy(link);
+                }
+                function fallbackCopy(text) {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    tg.showAlert('✅ ইনভাইট লিঙ্ক কপি হয়েছে!');
+                }
+            };
+
+            // গেম খেলা (এখানে ব্যালেন্স আপডেটের ডেমো যোগ করা যায়)
+            window.playGame = function() {
+                tg.showAlert('🎮 গেমটি লোড হচ্ছে... প্রস্তুত হোন!');
+                // ভবিষ্যতে: মিনি-গেম খুলতে পারেন
+            };
+
+        })();
+    </script>
+    <style>
+        @media (min-width: 500px) { .bottom-nav { width: 480px; } }
+    </style>
 </body>
 </html>
