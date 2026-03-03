@@ -59,14 +59,14 @@
                 .catch(err => console.error("Balance fetch error:", err));
         }
 
-        // ইনভাইট বাটন ফাংশন
+                // ইনভাইট বাটন ফাংশন
         function inviteFriends() {
-            const botUsername = "আপনার_বোট_ইউজারনেম"; // এখানে @ ছাড়া বোটের ইউজারনেম দিন
+            const botUsername = "আপনার_বোট_ইউজারনেম"; // এখানে বোটের আসল নাম দিন
             const inviteLink = `https://t.me/${botUsername}?start=${user.id}`;
             const shareText = "এই চমৎকার গেমে যোগ দিন এবং পুরস্কার জিতুন!";
             const fullUrl = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(shareText)}`;
             tg.openTelegramLink(fullUrl);
         }
-    </script>
+
 </body>
 </html>
