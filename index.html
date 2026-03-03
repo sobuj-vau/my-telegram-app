@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nova · modern mini app</title>
+    <title>CoinRush · Mini App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -90,20 +90,26 @@
             </button>
         </div>
 
-        <!-- referral card with dynamic link -->
-        <div class="stat-card p-5 rounded-2xl mb-5 relative border border-indigo-500/20">
-            <div class="flex items-start justify-between">
-                <div>
-                    <span class="text-xs text-gray-400 flex items-center gap-1"><i class="fa-regular fa-hand-peace"></i> আপনার রেফারেল লিঙ্ক</span>
-                    <p id="referral-link" class="text-sm font-mono mt-1 text-indigo-200 break-all">https://t.me/YourBot?start=...</p>
-                </div>
-                <button onclick="copyReferral()" class="copy-btn text-sm px-3 py-1.5 rounded-xl flex items-center gap-1.5 text-white">
-                    <i class="fa-regular fa-copy"></i> <span class="text-xs">কপি</span>
+        <!-- ========== নতুন ইনভাইট কার্ড (বড়, সুন্দর) ========== -->
+        <div class="stat-card p-6 rounded-2xl mb-5 text-center border border-indigo-500/20 bg-gradient-to-b from-slate-800/50 to-slate-900/50">
+            <div class="mb-4">
+                <i class="fa-solid fa-share-nodes text-4xl text-indigo-400 mb-2"></i>
+                <h3 class="text-lg font-bold text-white">বন্ধুদের ইনভাইট করুন</h3>
+                <p class="text-xs text-gray-400 mt-1">প্রতিটি সফল রেফারে পাবেন ৫.০০ টাকা বোনাস!</p>
+            </div>
+            
+            <div class="flex gap-2">
+                <button onclick="inviteFriends()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 py-3 rounded-xl font-bold transition active:scale-95 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-telegram"></i> বন্ধুদের পাঠান
+                </button>
+                <button onclick="copyInviteMessage()" class="flex-1 bg-white/10 hover:bg-white/20 py-3 rounded-xl transition active:scale-95 flex items-center justify-center gap-2">
+                    <i class="fa-regular fa-copy"></i> কপি মেসেজ
                 </button>
             </div>
-            <div class="flex gap-4 mt-4">
-                <div><span class="text-gray-400 text-xs">রেফারেল</span><span class="block text-xl font-bold" id="referral-count">০</span></div>
-                <div><span class="text-gray-400 text-xs">আয়</span><span class="block text-xl font-bold">৳ <span id="referral-earn">০.০০</span></span></div>
+
+            <div class="flex justify-around mt-5 pt-4 border-t border-white/5">
+                <div><span class="text-gray-500 text-[10px] uppercase">মোট রেফার</span><span class="block text-xl font-bold text-indigo-300" id="referral-count">0</span></div>
+                <div><span class="text-gray-500 text-[10px] uppercase">মোট আয়</span><span class="block text-xl font-bold text-green-400">৳ <span id="referral-earn">0.00</span></span></div>
             </div>
         </div>
 
@@ -117,7 +123,7 @@
             </button>
         </div>
 
-        <!-- recent activity (static for now) -->
+        <!-- recent activity -->
         <div class="mt-2">
             <div class="flex items-center justify-between mb-3">
                 <h3 class="font-semibold text-sm text-gray-300 flex items-center gap-1"><i class="fa-regular fa-clock text-blue-400"></i> সাম্প্রতিক কার্যক্রম</h3>
@@ -156,128 +162,123 @@
             tg.expand();
             tg.ready();
 
-            // ----- ১. আপনার বোটের ইউজারনেম এখানে দিন (যেমন: mycoolbot) -----
-            const BOT_USERNAME = "CoinRushMini_bot"; // @ ছাড়া বটের ইউজারনেম দিন
+            // বটের ইউজারনেম (আপনার দেওয়া)
+            const BOT_USERNAME = "CoinRushMini_bot"; 
 
-            // টেলিগ্রাম ইউজার অবজেক্ট
             const user = tg.initDataUnsafe?.user;
-
-            // DOM এলিমেন্ট
             const userNameSpan = document.getElementById('user-name');
             const userInitialSpan = document.getElementById('user-initial');
             const userAvatarDiv = document.getElementById('user-avatar');
             const balanceSpan = document.getElementById('balance');
-            const referralLinkEl = document.getElementById('referral-link');
             const referralCountSpan = document.getElementById('referral-count');
             const referralEarnSpan = document.getElementById('referral-earn');
 
             if (user) {
-                // নাম ও ইনিশিয়াল
-                let fullName = user.first_name || 'User';
-                if (user.last_name) fullName += ' ' + user.last_name;
-                userNameSpan.innerText = fullName;
-                userInitialSpan.innerText = user.first_name ? user.first_name.charAt(0).toUpperCase() : 'U';
+                userNameSpan.innerText = user.first_name + (user.last_name ? ' ' + user.last_name : '');
+                userInitialSpan.innerText = user.first_name.charAt(0).toUpperCase();
 
-                // ইউজারের ফটো থাকলে সেট করুন
                 if (user.photo_url) {
                     userAvatarDiv.innerHTML = `<img src="${user.photo_url}" class="w-11 h-11 rounded-2xl object-cover" alt="avatar">`;
                 }
 
-                // রেফারেল লিঙ্ক তৈরি
-                const inviteLink = `https://t.me/${BOT_USERNAME}?start=${user.id}`;
-                referralLinkEl.innerText = inviteLink;
-
-                // ৩. ডাটাবেস থেকে আসল ব্যালেন্স নিয়ে আসা (এবং রেফারেল তথ্য)
+                // API কল
                 fetch(`/api/user/${user.id}`)
                     .then(res => res.json())
                     .then(data => {
                         if (data.balance !== undefined) {
-                            // লোকাল ফরম্যাটে দেখান (যেমন ১২৫.৭৫)
                             balanceSpan.innerText = data.balance.toFixed(2);
                         }
-                        // যদি রেফারেল কাউন্ট ও আয় ব্যাকএন্ড থেকে আসে
                         if (data.referralCount !== undefined) {
                             referralCountSpan.innerText = data.referralCount;
                         }
                         if (data.referralEarnings !== undefined) {
                             referralEarnSpan.innerText = data.referralEarnings.toFixed(2);
                         } else {
-                            // ডেমো ডাটা (যদি না থাকে)
                             referralCountSpan.innerText = '127';
                             referralEarnSpan.innerText = '12.5';
                         }
                     })
                     .catch(err => {
-                        console.error("Database error:", err);
-                        balanceSpan.innerText = "০.০০";
-                        // ফallback ডাটা
+                        console.error("Error:", err);
+                        balanceSpan.innerText = "0.00";
                         referralCountSpan.innerText = '127';
                         referralEarnSpan.innerText = '12.5';
                     });
             } else {
-                // টেস্ট মোড (যখন টেলিগ্রামে নয়)
+                // টেস্ট মোড
                 userNameSpan.innerText = 'টেস্ট ইউজার';
                 userInitialSpan.innerText = 'T';
-                const demoId = 123456;
-                const inviteLink = `https://t.me/${BOT_USERNAME}?start=${demoId}`;
-                referralLinkEl.innerText = inviteLink;
-                balanceSpan.innerText = '১,২৫০.৫০';
+                balanceSpan.innerText = '1250.50';
                 referralCountSpan.innerText = '127';
-                referralEarnSpan.innerText = '১২.৫';
+                referralEarnSpan.innerText = '12.5';
             }
 
-            // গ্লোবাল ফাংশন
             window.tg = tg;
 
-            // ইনভাইট ফ্রেন্ডস
+            // ========== আপডেটেড ফাংশন ==========
             window.inviteFriends = function() {
                 if (!user) {
                     tg.showAlert('প্রথমে টেলিগ্রাম ওপেন করুন');
                     return;
                 }
-                const inviteLink = `https://t.me/${BOT_USERNAME}?start=${user.id}`;
-                const shareText = `🚀 এই চমৎকার গেমে যোগ দিন এবং পুরস্কার জিতুন!`;
-                const fullUrl = `https://t.me/share/url?url=${encodeURIComponent(inviteLink)}&text=${encodeURIComponent(shareText)}`;
+                const link = `https://t.me/${BOT_USERNAME}?start=${user.id}`;
+                
+                // সুন্দর মেসেজ (ব্যক্তিগতকৃত)
+                const shareText = 
+`🎉 *${user.first_name}* আপনাকে CoinRush-এ আমন্ত্রণ জানিয়েছে!
+
+✅ জয়েন করুন এবং পাবেন ৫ টাকা সাইন আপ বোনাস!
+👉 ${link}
+
+🚀 গেম খেলে আনন্দ ও পুরস্কার দুটোই।`;
+
+                const fullUrl = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(shareText)}`;
                 tg.openTelegramLink(fullUrl);
             };
 
-            // কপি রেফারেল লিঙ্ক (আধুনিক + ফallback)
-            window.copyReferral = function() {
+            window.copyInviteMessage = function() {
                 if (!user) {
                     tg.showAlert('ইউজার তথ্য পাওয়া যায়নি');
                     return;
                 }
                 const link = `https://t.me/${BOT_USERNAME}?start=${user.id}`;
+                const message = 
+`🎉 ${user.first_name} আপনাকে CoinRush-এ আমন্ত্রণ জানিয়েছে!
+
+✅ জয়েন করুন এবং পাবেন ৫ টাকা সাইন আপ বোনাস!
+👉 ${link}
+
+🚀 গেম খেলে আনন্দ ও পুরস্কার দুটোই।`;
+
                 if (navigator.clipboard && navigator.clipboard.writeText) {
-                    navigator.clipboard.writeText(link).then(() => {
-                        tg.showAlert('✅ ইনভাইট লিঙ্ক কপি হয়েছে!');
-                    }).catch(() => {
-                        fallbackCopy(link);
-                    });
+                    navigator.clipboard.writeText(message).then(() => {
+                        tg.showAlert('✅ মেসেজ ও লিঙ্ক কপি হয়েছে! এখন যেকোনো চ্যাটে পেস্ট করুন।');
+                    }).catch(() => fallbackCopy(message));
                 } else {
-                    fallbackCopy(link);
+                    fallbackCopy(message);
                 }
+
                 function fallbackCopy(text) {
-                    const textarea = document.createElement('textarea');
-                    textarea.value = text;
-                    document.body.appendChild(textarea);
-                    textarea.select();
+                    const el = document.createElement('textarea');
+                    el.value = text;
+                    document.body.appendChild(el);
+                    el.select();
                     document.execCommand('copy');
-                    document.body.removeChild(textarea);
-                    tg.showAlert('✅ ইনভাইট লিঙ্ক কপি হয়েছে!');
+                    document.body.removeChild(el);
+                    tg.showAlert('✅ মেসেজ ও লিঙ্ক কপি হয়েছে!');
                 }
             };
 
-            // গেম খেলা (এখানে ব্যালেন্স আপডেটের ডেমো যোগ করা যায়)
             window.playGame = function() {
                 tg.showAlert('🎮 গেমটি লোড হচ্ছে... প্রস্তুত হোন!');
-                // ভবিষ্যতে: মিনি-গেম খুলতে পারেন
             };
-
         })();
     </script>
+
     <style>
-        @media (min-width: 500px) { .bottom-nav { width: 480px; } }
+        @media (min-width: 500px) {
+            .bottom-nav { width: 480px; }
+        }
     </style>
 </body>
-</html>
+                </html>
